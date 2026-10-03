@@ -1,0 +1,38 @@
+[package]
+name = "tc_macs"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Message authentication codes over block ciphers and digests: CBC-MAC, CFB-MAC, CMAC, GMAC and HMAC, with shared MAC traits."
+readme = "README.md"
+documentation = "https://docs.rs/tc_macs"
+keywords = ["mac", "hmac", "cmac", "cryptography", "no-std"]
+categories = ["cryptography", "no-std"]
+include = ["src/**", "tests/**", "README.md", "CHANGELOG.md", "LICENSE-MIT", "LICENSE-APACHE"]
+
+[package.metadata.docs.rs]
+all-features = true
+
+[features]
+default = []
+alloc = ["tc_block_cipher/alloc", "tc_block_modes?/alloc", "tc_zeroize/alloc"]
+cbc-mac = ["dep:tc_block_modes", "dep:tc_block_padding"]
+cfb-mac = ["dep:tc_block_modes", "dep:tc_block_padding"]
+cmac = []
+gmac = ["dep:tc_aead_cipher", "dep:tc_block_modes"]
+hmac = ["dep:tc_digest"]
+
+[dependencies]
+tc_aead_cipher = { version = "0.1.0", optional = true }
+tc_block_cipher = "0.1.0"
+tc_block_modes = { version = "0.1.0", optional = true }
+tc_block_padding = { version = "0.1.0", optional = true }
+tc_digest = { version = "0.1.0", optional = true }
+tc_zeroize = "0.1.0"
+
+[dev-dependencies]
+tc_aes = "0.1.0"
+tc_des = "0.1.0"
+tc_sha = "0.1.1"
