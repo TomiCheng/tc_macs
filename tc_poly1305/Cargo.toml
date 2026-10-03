@@ -1,0 +1,17 @@
+[package]
+name = "tc_poly1305"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "The Poly1305 one-time message authentication code (RFC 8439), constant time, over the tc_macs traits."
+readme = "README.md"
+documentation = "https://docs.rs/tc_poly1305"
+keywords = ["poly1305", "mac", "rfc8439", "cryptography", "no-std"]
+categories = ["cryptography", "no-std"]
+include = ["src/**", "tests/**", "README.md", "CHANGELOG.md", "LICENSE-MIT", "LICENSE-APACHE"]
+
+[dependencies]
+tc_macs = { version = "0.1.0", path = "../tc_macs" }
+tc_zeroize = "0.1.0"

@@ -1,0 +1,164 @@
+name: CI
+
+# CI runs on pull requests only. Pushes are not tested, including merges and
+# direct commits to develop; the develop-to-main pull request tests those.
+on:
+  pull_request:
+    branches: [develop, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  native:
+    name: Native / ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux x64
+            os: ubuntu-latest
+            host: x86_64-unknown-linux-gnu
+          - name: Linux ARM64
+            os: ubuntu-24.04-arm
+            host: aarch64-unknown-linux-gnu
+          - name: macOS ARM64
+            os: macos-14
+            host: aarch64-apple-darwin
+          - name: Windows x64
+            os: windows-latest
+            host: x86_64-pc-windows-msvc
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install native toolchain
+        run: |
+          rustup toolchain install stable-${{ matrix.host }} --profile minimal
+          rustup default stable-${{ matrix.host }}
+          rustc -vV
+          rustc -vV | grep -Fx 'host: ${{ matrix.host }}'
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.name }}
+      - run: cargo test --locked
+      - run: cargo test --locked --all-features
+
+  x86:
+    name: Native execution / Linux i686
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install 32-bit compiler and runtime libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes gcc-multilib
+      - run: rustup toolchain install stable --profile minimal
+      - run: rustup default stable
+      - run: rustup target add i686-unknown-linux-gnu
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test --locked --target i686-unknown-linux-gnu
+      - run: cargo test --locked --target i686-unknown-linux-gnu --all-features
+
+  msrv:
+    name: MSRV / Rust 1.85.0
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - run: rustup toolchain install 1.85.0 --profile minimal
+      - uses: Swatinem/rust-cache@v2
+        env:
+          RUSTUP_TOOLCHAIN: 1.85.0
+      # Every dependency and dev-dependency is a tc_* crate that requires 1.85
+      # as well, so Rust 1.85 covers every build, tests included, whatever the
+      # features.
+      - run: cargo +1.85.0 test --locked
+      - run: cargo +1.85.0 test --locked --all-features
+
+  quality:
+    name: Format, Clippy, docs and package
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      RUSTDOCFLAGS: -D warnings
+    steps:
+      - uses: actions/checkout@v7
+      - run: rustup toolchain install stable --profile minimal --component rustfmt,clippy
+      - run: rustup default stable
+      - run: cargo fmt --all -- --check
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: build-only
+      - run: cargo clippy --locked --all-targets -- -D warnings
+      - run: cargo clippy --locked --all-targets --all-features -- -D warnings
+      - run: cargo doc --locked --no-deps
+      - run: cargo doc --locked --no-deps --all-features
+      # Each MAC alone, with and without its allocating form, so that none
+      # silently relies on another's items or doc links.
+      - name: Clippy and rustdoc on each tc_macs feature alone
+        run: |
+          for features in alloc cbc-mac cfb-mac cmac gmac hmac cbc-mac,alloc cfb-mac,alloc cmac,alloc gmac,alloc hmac,alloc; do
+            cargo clippy --locked -p tc_macs --all-targets --features "$features" -- -D warnings
+            cargo doc --locked --no-deps -p tc_macs --features "$features"
+          done
+      # Packaged together so tc_poly1305 is verified against this tc_macs, not
+      # the release on crates.io.
+      - run: cargo package --locked -p tc_macs -p tc_poly1305
+        env:
+          # Keep unpacked package manifests outside rust-cache's build tree.
+          CARGO_TARGET_DIR: ${{ runner.temp }}/package
+
+  portable:
+    name: Cross-architecture contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - run: rustup toolchain install stable --profile minimal
+      - run: rustup default stable
+      - run: rustup target add wasm32-unknown-unknown aarch64-unknown-none
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo check --locked --target wasm32-unknown-unknown
+      - run: cargo check --locked --target wasm32-unknown-unknown --all-features
+      - run: cargo check --locked --target aarch64-unknown-none
+      - run: cargo check --locked --target aarch64-unknown-none --all-features
+      - name: Check dependency sets
+        run: |
+          check() {
+            # Sort the expected names the way the actual list is sorted.
+            expected="$(printf '%s\n' $1 | sort | paste -sd' ')"; shift
+            actual="$(cargo tree --locked --edges normal --prefix none "$@" | cut -d' ' -f1 | sort -u | paste -sd' ')"
+            if [ "$actual" != "$expected" ]; then
+              echo "cargo tree $*: expected '$expected', got '$actual'" >&2
+              exit 1
+            fi
+          }
+          # The default build carries only the contracts; each MAC feature adds
+          # its own dependencies, and alloc enables features of existing ones.
+          base='tc_block_cipher tc_macs tc_zeroize'
+          modes='tc_block_modes tc_block_padding'
+          # No dependency is platform-specific, so every target shares one set.
+          for target in aarch64-unknown-none wasm32-unknown-unknown x86_64-unknown-linux-gnu i686-unknown-linux-gnu; do
+            check "$base" -p tc_macs --target "$target"
+            check "$base" -p tc_macs --target "$target" --features alloc
+            check "$base $modes" -p tc_macs --target "$target" --features cbc-mac
+            check "$base $modes" -p tc_macs --target "$target" --features cfb-mac
+            check "$base" -p tc_macs --target "$target" --features cmac
+            check "$base tc_aead_cipher tc_block_modes tc_constant_time" -p tc_macs --target "$target" --features gmac
+            check "$base tc_digest" -p tc_macs --target "$target" --features hmac
+            check "$base $modes tc_aead_cipher tc_constant_time tc_digest" -p tc_macs --target "$target" --all-features
+            check "$base tc_poly1305" -p tc_poly1305 --target "$target"
+          done
