@@ -11,9 +11,10 @@ use tc_block_padding::BlockCipherPadding;
 use super::shared::CbcMacCore;
 use crate::{InitError, Mac, MacError, MacInit};
 
-/// CBC-MAC over the block cipher `C`, with buffers sized from its block size
-/// at run time; Bouncy Castle's `CbcBlockCipherMac` without padding. Requires
-/// the `alloc` feature.
+/// CBC-MAC over the block cipher `C`, with buffers sized from its block size at
+/// run time; Bouncy Castle's `CbcBlockCipherMac` without padding.
+///
+/// Available with the `cbc-mac` and `alloc` features.
 ///
 /// It computes the same tags as [`FixedCbcMac`](crate::FixedCbcMac) and shares
 /// its limits: CBC-MAC is secure only for messages of one fixed length, and
@@ -129,7 +130,9 @@ where
 
 /// CBC-MAC over the block cipher `C` that pads the final block with `P`, with
 /// buffers sized from its block size at run time; Bouncy Castle's
-/// `CbcBlockCipherMac` with padding. Requires the `alloc` feature.
+/// `CbcBlockCipherMac` with padding.
+///
+/// Available with the `cbc-mac` and `alloc` features.
 ///
 /// It computes the same tags as
 /// [`FixedPaddedCbcMac`](crate::FixedPaddedCbcMac): a partial final block is

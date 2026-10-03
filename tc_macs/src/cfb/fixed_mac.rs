@@ -13,6 +13,8 @@ use crate::{InitError, Mac, MacError, MacInit};
 /// buffers inline for builds without an allocator; Bouncy Castle's
 /// `CfbBlockCipherMac` without padding.
 ///
+/// Available with the `cfb-mac` feature.
+///
 /// The message is encrypted in CFB mode with segments of the feedback size,
 /// one byte unless sized otherwise, and the tag is the first
 /// [`mac_size`](Mac::mac_size) bytes of the encryption of the final shift
@@ -22,7 +24,7 @@ use crate::{InitError, Mac, MacError, MacInit};
 /// under the same key and IV.
 ///
 /// Like CBC-MAC, CFB-MAC is secure only for messages of one fixed length. Use
-/// [`FixedCmac`](crate::FixedCmac) where lengths vary.
+/// `FixedCmac` where lengths vary.
 ///
 /// Constant time exactly when the cipher is: CFB adds only XORs and copies,
 /// and only lengths decide the work. The IV, the shift register, the keystream
@@ -136,6 +138,8 @@ where
 /// CFB-MAC over the block cipher `C` with blocks of `N` bytes that pads a
 /// partial final segment with `P`, keeping its buffers inline for builds
 /// without an allocator; Bouncy Castle's `CfbBlockCipherMac` with padding.
+///
+/// Available with the `cfb-mac` feature.
 ///
 /// It behaves as [`FixedCfbMac`] but pads a partial final segment instead of
 /// filling it with zeros. A full final segment is left as it is, unlike in

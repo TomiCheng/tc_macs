@@ -27,7 +27,8 @@ Initial release.
 ### Compatibility
 
 - Requires Rust 1.85 or later and uses Rust edition 2024.
-- Depends on `tc_macs` 0.1 and `tc_zeroize` 0.1. Contains no `unsafe` code.
+- Depends on `tc_macs` 0.1, whose default build carries only the contracts,
+  and `tc_zeroize` 0.1. Contains no `unsafe` code.
 - Constant time; lengths are public.
 - Poly1305-AES, the block-cipher construction, is not included.
 - The key and the message state are wiped on drop. Wiping does not reach the

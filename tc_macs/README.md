@@ -11,27 +11,32 @@ CFB-MAC, CMAC, GMAC and HMAC, and the `Mac` and `MacInit` contracts they share
 with MAC crates such as [`tc_poly1305`](https://crates.io/crates/tc_poly1305).
 Ported from Bouncy Castle C#. `no_std`, no `unsafe`, Rust 1.85 or later.
 
+The default build carries only the contracts, their errors and the key
+containers, and depends on `tc_block_cipher` and `tc_zeroize`; each MAC is
+behind its own feature.
+
 ## Types
 
-- `FixedCbcMac`, `CbcMac` (`alloc`) — CBC-MAC, for messages of one fixed
+- `FixedCbcMac`, `CbcMac` (`cbc-mac`) — CBC-MAC, for messages of one fixed
   length.
-- `FixedPaddedCbcMac`, `PaddedCbcMac` (`alloc`) — CBC-MAC that pads the final
-  block.
-- `FixedCfbMac`, `CfbMac` (`alloc`) — CFB-MAC, for messages of one fixed
+- `FixedPaddedCbcMac`, `PaddedCbcMac` (`cbc-mac`) — CBC-MAC that pads the
+  final block.
+- `FixedCfbMac`, `CfbMac` (`cfb-mac`) — CFB-MAC, for messages of one fixed
   length.
-- `FixedPaddedCfbMac`, `PaddedCfbMac` (`alloc`) — CFB-MAC that pads a partial
-  final segment.
-- `FixedCmac`, `Cmac` (`alloc`) — CMAC (NIST SP 800-38B, RFC 4493) over a 64-
+- `FixedPaddedCfbMac`, `PaddedCfbMac` (`cfb-mac`) — CFB-MAC that pads a
+  partial final segment.
+- `FixedCmac`, `Cmac` (`cmac`) — CMAC (NIST SP 800-38B, RFC 4493) over a 64-
   or 128-bit block cipher.
-- `Gmac` — GMAC (NIST SP 800-38D) over a 128-bit block cipher.
-- `FixedHmac`, `Hmac` (`alloc`) — HMAC (RFC 2104) over a `tc_digest` digest.
+- `Gmac` (`gmac`) — GMAC (NIST SP 800-38D) over a 128-bit block cipher.
+- `FixedHmac`, `Hmac` (`hmac`) — HMAC (RFC 2104) over a `tc_digest` digest.
 - `InitError`, `MacError` — initialization and processing errors that wrap the
   primitive's.
 - `KeyRef`, `KeyFixed`, `KeyOwned` (`alloc`) — key containers re-exported from
   `tc_block_cipher`.
 
 The `Fixed` forms keep their buffers inline, with the block size as a const
-parameter; the others size them from the cipher or digest at run time.
+parameter; the others also need `alloc` and size them from the cipher or
+digest at run time.
 
 ## Traits
 
@@ -43,13 +48,21 @@ parameter; the others size them from the cipher or digest at run time.
 
 ## Features
 
-- `alloc` (off by default) — the MACs sized at run time, and `KeyOwned`.
+- `cbc-mac` (off by default) — CBC-MAC; adds `tc_block_modes` and
+  `tc_block_padding`.
+- `cfb-mac` (off by default) — CFB-MAC; adds `tc_block_modes` and
+  `tc_block_padding`.
+- `cmac` (off by default) — CMAC; adds no dependency.
+- `gmac` (off by default) — GMAC; adds `tc_aead_cipher` and `tc_block_modes`.
+- `hmac` (off by default) — HMAC; adds `tc_digest`.
+- `alloc` (off by default) — the MACs sized at run time, and `KeyOwned`; does
+  not require the standard library.
 
 ## Usage
 
 ```toml
 [dependencies]
-tc_macs = "0.1.0"
+tc_macs = { version = "0.1.0", features = ["cmac"] }
 tc_aes = "0.1.0"
 ```
 

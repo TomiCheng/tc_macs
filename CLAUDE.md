@@ -29,19 +29,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 The crate list and workspace-wide checks live in the root
 [README.md](README.md); read it rather than restating it here. Every crate is
 `no_std` and contains no `unsafe` code, which each crate root forbids.
-`tc_macs` needs no allocator by default: its only feature, `alloc`, is
-default-off and adds the MACs that size their buffers from the cipher or
-digest at run time (`CbcMac`, `PaddedCbcMac`, `CfbMac`, `PaddedCfbMac`, `Cmac`
-and `Hmac`) and the re-exported `KeyOwned`; the `Fixed` forms keep theirs
-inline. `tc_poly1305` has no feature and never allocates.
 
-`tc_macs` depends on `tc_aead_cipher`, whose GCM carries GMAC,
-`tc_block_cipher`, `tc_block_modes`, `tc_block_padding`, `tc_digest` and
-`tc_zeroize`, and through `tc_aead_cipher` on `tc_constant_time`; `alloc`
-enables features of those crates and adds none. `tc_poly1305` depends on
-`tc_macs` and `tc_zeroize`, and so on the whole `tc_macs` set. CI enforces each
-set with `cargo tree` on the `wasm32-unknown-unknown`, `aarch64-unknown-none`
-and x86 targets.
+The default build of `tc_macs` carries only the contracts, their errors and the
+re-exported key containers, so that a MAC crate such as `tc_poly1305` depends
+on nothing more; it depends on `tc_block_cipher` and `tc_zeroize`. Each MAC is
+behind its own default-off feature, which adds only what that MAC needs:
+`cbc-mac` and `cfb-mac` add `tc_block_modes` and `tc_block_padding`, `cmac`
+adds nothing, `gmac` adds `tc_aead_cipher`, whose GCM carries GMAC, and
+`tc_block_modes`, and `hmac` adds `tc_digest`. The default-off `alloc` feature
+adds `KeyOwned` and, for each MAC enabled, the form that sizes its buffers at
+run time (`CbcMac`, `PaddedCbcMac`, `CfbMac`, `PaddedCfbMac`, `Cmac` and
+`Hmac`), gated on both features; the `Fixed` forms keep their buffers inline.
+`alloc` enables features of existing dependencies and adds none. `tc_poly1305`
+has no feature, never allocates, and depends on the default build of `tc_macs`
+and on `tc_zeroize`. CI enforces each of these dependency sets with
+`cargo tree` on the `wasm32-unknown-unknown`, `aarch64-unknown-none` and x86
+targets, and runs Clippy and rustdoc on each `tc_macs` feature alone, with and
+without `alloc`, so that no MAC silently relies on another's items. A new MAC in
+`tc_macs` gets its own feature in the same way: the module and its re-exports
+gated in `lib.rs`, its test file opening with `#![cfg(feature = "...")]`, an
+entry in the README's "Features" list, and the CI loops and dependency checks.
 
 `tc_macs` owns the `Mac` and `MacInit` contracts, the Rust form of Bouncy
 Castle's `IMac`; MAC crates such as `tc_poly1305` implement them rather than
@@ -75,7 +82,7 @@ left behind by moves are a documented limitation, not wiped per block.
 Rust 1.85 is guaranteed for every build in the workspace, tests included,
 because every dependency and dev-dependency is a first-party `tc_*` crate that
 requires 1.85 as well. The MSRV job therefore runs `cargo test` on 1.85 with
-and without `alloc`. APIs stabilized after 1.85, such as `<[T]>::as_chunks`
+no feature and with all of them. APIs stabilized after 1.85, such as `<[T]>::as_chunks`
 (1.88) and `is_multiple_of` (1.87), are rejected in library code by clippy's
 `incompatible_msrv` lint, which reads the inherited `rust-version`, but clippy
 lets them through in tests, where only the MSRV job catches them; the
@@ -111,7 +118,10 @@ Documentation is part of the contract: crates use `#![deny(missing_docs)]`,
 doctests carry the executable examples, and CI runs `cargo doc` with
 `RUSTDOCFLAGS: -D warnings`, with and without `--all-features`. Doc links to
 feature-gated items break the build without that feature, so name them in plain
-code spans. An additive public API change belongs in the crate README's
+code spans; that includes links from one MAC to another behind a different
+feature, such as CBC-MAC's pointer to `FixedCmac`. The crate-level example
+needs the `cmac` and `hmac` features and is gated on them inside the doctest.
+An additive public API change belongs in the crate README's
 contract lists — "Types", "Traits" and "Features" in `tc_macs/README.md`,
 "Types" in `tc_poly1305/README.md` — and in the changelog, not only in the
 code. Known-answer vectors cite their source: an RFC, a NIST publication, or

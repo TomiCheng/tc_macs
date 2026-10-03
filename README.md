@@ -16,7 +16,7 @@ Each crate is published separately and keeps its own README and changelog.
 
 | Crate | Version | Description |
 | --- | --- | --- |
-| [`tc_macs`](tc_macs) | [![crates.io](https://img.shields.io/crates/v/tc_macs.svg)](https://crates.io/crates/tc_macs) [![docs.rs](https://docs.rs/tc_macs/badge.svg)](https://docs.rs/tc_macs) | CBC-MAC, CFB-MAC, CMAC, GMAC and HMAC over `tc_block_cipher` engines and `tc_digest` digests, and the `Mac` and `MacInit` contracts that MAC crates implement. Each MAC is constant time exactly when its cipher or digest is, and wipes its buffers on drop. `no_std`, no `unsafe`; a default-off `alloc` feature adds the MACs sized at run time. |
+| [`tc_macs`](tc_macs) | [![crates.io](https://img.shields.io/crates/v/tc_macs.svg)](https://crates.io/crates/tc_macs) [![docs.rs](https://docs.rs/tc_macs/badge.svg)](https://docs.rs/tc_macs) | CBC-MAC, CFB-MAC, CMAC, GMAC and HMAC over `tc_block_cipher` engines and `tc_digest` digests, and the `Mac` and `MacInit` contracts that MAC crates implement. Each MAC is constant time exactly when its cipher or digest is, and wipes its buffers on drop. `no_std`, no `unsafe`; the default build carries only the contracts and depends on `tc_block_cipher` and `tc_zeroize`. Default-off `cbc-mac`, `cfb-mac`, `cmac`, `gmac` and `hmac` features add the MACs, and a default-off `alloc` feature adds their forms sized at run time. |
 | [`tc_poly1305`](tc_poly1305) | [![crates.io](https://img.shields.io/crates/v/tc_poly1305.svg)](https://crates.io/crates/tc_poly1305) [![docs.rs](https://docs.rs/tc_poly1305/badge.svg)](https://docs.rs/tc_poly1305) | Raw Poly1305 (RFC 8439) with a 32-byte one-time key, which `do_final` consumes. Constant time; wipes its key and state on drop. `no_std`, no allocator, no `unsafe`, no features; depends on `tc_macs` and `tc_zeroize`. |
 
 `tc_macs` defines the contracts that every MAC crate in the workspace
@@ -46,10 +46,11 @@ cargo doc --locked --no-deps --all-features
 ```
 
 CI additionally runs these on Linux x64, i686 and ARM64, macOS ARM64, and
-Windows x64, with and without `alloc`, runs the tests on Rust 1.85.0, checks
-the `wasm32-unknown-unknown` and `aarch64-unknown-none` targets and each
-crate's dependency set on each target, and verifies the package archives. See
-[.github/workflows/ci.yml](.github/workflows/ci.yml).
+Windows x64, with and without every feature, runs Clippy and rustdoc on each
+`tc_macs` feature alone, runs the tests on Rust 1.85.0, checks the
+`wasm32-unknown-unknown` and `aarch64-unknown-none` targets and the dependency
+set of each crate and feature on each target, and verifies the package
+archives. See [.github/workflows/ci.yml](.github/workflows/ci.yml).
 
 Before a release, check each archive and run publication validation from a
 committed checkout:

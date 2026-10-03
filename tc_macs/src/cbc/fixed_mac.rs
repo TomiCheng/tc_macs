@@ -13,6 +13,8 @@ use crate::{InitError, Mac, MacError, MacInit};
 /// buffers inline for builds without an allocator; Bouncy Castle's
 /// `CbcBlockCipherMac` without padding.
 ///
+/// Available with the `cbc-mac` feature.
+///
 /// The tag is the first [`mac_size`](Mac::mac_size) bytes of the last block of
 /// the CBC encryption of the message, half a block unless sized otherwise. A
 /// partial final block is filled with zeros, and a full one is left as it is.
@@ -23,8 +25,7 @@ use crate::{InitError, Mac, MacError, MacInit};
 /// CBC-MAC is secure only for messages of one fixed length: from tags of
 /// variable-length messages an attacker can forge others, and with zero fill a
 /// message and the same message followed by zero bytes up to the block
-/// boundary share a tag. Use [`FixedCmac`](crate::FixedCmac) where lengths
-/// vary.
+/// boundary share a tag. Use `FixedCmac` where lengths vary.
 ///
 /// Constant time exactly when the cipher is: CBC adds only XORs and copies,
 /// and only lengths decide the work. The buffers are wiped on drop, the CBC mode
@@ -131,11 +132,12 @@ where
 /// final block with `P`, keeping its buffers inline for builds without an
 /// allocator; Bouncy Castle's `CbcBlockCipherMac` with padding.
 ///
+/// Available with the `cbc-mac` feature.
+///
 /// It behaves as [`FixedCbcMac`] but for the final block: a partial one is
 /// padded, and a full one is followed by a block of padding alone, whatever
 /// the scheme. Padding keeps a message and its zero-extended form apart, but
-/// the other limits of CBC-MAC remain: use [`FixedCmac`](crate::FixedCmac)
-/// where lengths vary.
+/// the other limits of CBC-MAC remain: use `FixedCmac` where lengths vary.
 ///
 /// Constant time exactly when the cipher and the padding are; the schemes of
 /// `tc_block_padding` pad in constant time with respect to the block contents.

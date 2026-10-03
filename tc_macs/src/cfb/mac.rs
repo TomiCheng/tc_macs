@@ -11,9 +11,10 @@ use tc_block_padding::BlockCipherPadding;
 use super::shared::CfbMacCore;
 use crate::{InitError, Mac, MacError, MacInit};
 
-/// CFB-MAC over the block cipher `C`, with buffers sized from its block size
-/// at run time; Bouncy Castle's `CfbBlockCipherMac` without padding. Requires
-/// the `alloc` feature.
+/// CFB-MAC over the block cipher `C`, with buffers sized from its block size at
+/// run time; Bouncy Castle's `CfbBlockCipherMac` without padding.
+///
+/// Available with the `cfb-mac` and `alloc` features.
 ///
 /// It computes the same tags as [`FixedCfbMac`](crate::FixedCfbMac) and shares
 /// its limits: CFB-MAC is secure only for messages of one fixed length. Use
@@ -132,7 +133,9 @@ where
 
 /// CFB-MAC over the block cipher `C` that pads a partial final segment with
 /// `P`, with buffers sized from its block size at run time; Bouncy Castle's
-/// `CfbBlockCipherMac` with padding. Requires the `alloc` feature.
+/// `CfbBlockCipherMac` with padding.
+///
+/// Available with the `cfb-mac` and `alloc` features.
 ///
 /// It computes the same tags as
 /// [`FixedPaddedCfbMac`](crate::FixedPaddedCfbMac): only a partial final

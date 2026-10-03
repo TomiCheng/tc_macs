@@ -1,6 +1,8 @@
 //! CMAC against the AES vectors of NIST SP 800-38B (RFC 4493) and the DESede
 //! vector of Bouncy Castle C#.
 
+#![cfg(feature = "cmac")]
+
 use tc_aes::AesEngine;
 use tc_des::{DesEdeEngine, DesEngine};
 use tc_macs::{FixedCmac, InitError, KeyRef, Mac, MacError, MacInit};

@@ -17,6 +17,8 @@ const MAX_MAC_SIZE: usize = 16;
 /// authenticates the message as associated data and encrypts nothing; Bouncy
 /// Castle's `GMac`. It needs no allocator.
 ///
+/// Available with the `gmac` feature.
+///
 /// The tag is 4 to 16 bytes, 16 unless sized otherwise. `init` takes a key and
 /// an IV through [`KeyParams`] and `tc_block_modes::IvParams`; the IV is GCM's
 /// nonce, of any length but zero, and 12 bytes is the length NIST recommends.

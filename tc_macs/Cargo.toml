@@ -17,14 +17,19 @@ all-features = true
 
 [features]
 default = []
-alloc = ["tc_block_cipher/alloc", "tc_block_modes/alloc", "tc_zeroize/alloc"]
+alloc = ["tc_block_cipher/alloc", "tc_block_modes?/alloc", "tc_zeroize/alloc"]
+cbc-mac = ["dep:tc_block_modes", "dep:tc_block_padding"]
+cfb-mac = ["dep:tc_block_modes", "dep:tc_block_padding"]
+cmac = []
+gmac = ["dep:tc_aead_cipher", "dep:tc_block_modes"]
+hmac = ["dep:tc_digest"]
 
 [dependencies]
-tc_aead_cipher = "0.1.0"
+tc_aead_cipher = { version = "0.1.0", optional = true }
 tc_block_cipher = "0.1.0"
-tc_block_modes = "0.1.0"
-tc_block_padding = "0.1.0"
-tc_digest = "0.1.0"
+tc_block_modes = { version = "0.1.0", optional = true }
+tc_block_padding = { version = "0.1.0", optional = true }
+tc_digest = { version = "0.1.0", optional = true }
 tc_zeroize = "0.1.0"
 
 [dev-dependencies]

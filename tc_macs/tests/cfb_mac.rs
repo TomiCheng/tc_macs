@@ -1,5 +1,7 @@
 //! CFB-MAC against the DES vectors of Bouncy Castle C#'s `MacTest.cs`.
 
+#![cfg(feature = "cfb-mac")]
+
 use tc_block_modes::KeyWithIvRef;
 use tc_block_padding::Pkcs7Padding;
 use tc_des::DesEngine;

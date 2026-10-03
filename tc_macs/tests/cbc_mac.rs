@@ -1,5 +1,7 @@
 //! CBC-MAC against the DES vectors of Bouncy Castle C#'s `MacTest.cs`.
 
+#![cfg(feature = "cbc-mac")]
+
 use core::convert::Infallible;
 
 use tc_block_modes::KeyWithIvRef;

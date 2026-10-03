@@ -2,16 +2,22 @@
 //! [`Mac`] and [`MacInit`] contracts they share with MAC crates built on this
 //! one, such as `tc_poly1305`.
 //!
-//! - [`FixedCbcMac`] and `CbcMac` (`alloc`) — CBC-MAC, with
-//!   [`FixedPaddedCbcMac`] and `PaddedCbcMac` (`alloc`) padding the final
-//!   block.
-//! - [`FixedCfbMac`] and `CfbMac` (`alloc`) — CFB-MAC, with
-//!   [`FixedPaddedCfbMac`] and `PaddedCfbMac` (`alloc`) padding the final
-//!   segment.
-//! - [`FixedCmac`] and `Cmac` (`alloc`) — CMAC (NIST SP 800-38B, RFC 4493)
-//!   over a 64- or 128-bit block cipher.
-//! - [`Gmac`] — GMAC (NIST SP 800-38D) over a 128-bit block cipher.
-//! - [`FixedHmac`] and `Hmac` (`alloc`) — HMAC (RFC 2104) over a digest.
+//! The default build carries only the contracts, their errors and the key
+//! containers, so a MAC crate that implements the contracts depends on nothing
+//! more. Each MAC is behind its own default-off feature:
+//!
+//! - `cbc-mac` — `FixedCbcMac`, and `FixedPaddedCbcMac`, which pads the final
+//!   block; adds `tc_block_modes` and `tc_block_padding`.
+//! - `cfb-mac` — `FixedCfbMac`, and `FixedPaddedCfbMac`, which pads a partial
+//!   final segment; adds `tc_block_modes` and `tc_block_padding`.
+//! - `cmac` — `FixedCmac`, CMAC (NIST SP 800-38B, RFC 4493) over a 64- or
+//!   128-bit block cipher; adds no dependency.
+//! - `gmac` — `Gmac`, GMAC (NIST SP 800-38D) over a 128-bit block cipher; adds
+//!   `tc_aead_cipher` and `tc_block_modes`.
+//! - `hmac` — `FixedHmac`, HMAC (RFC 2104) over a digest; adds `tc_digest`.
+//! - `alloc` — `KeyOwned`, and for each MAC enabled the form that sizes its
+//!   buffers from the cipher or digest at run time: `CbcMac`, `PaddedCbcMac`,
+//!   `CfbMac`, `PaddedCfbMac`, `Cmac` and `Hmac`.
 //!
 //! The block-cipher MACs run over any engine that implements the
 //! `tc_block_cipher` traits, such as `tc_aes`, and HMAC over any digest that
@@ -24,10 +30,9 @@
 //! CFB-MAC and GMAC also take an IV through `tc_block_modes::IvParams`, which
 //! `tc_block_modes::KeyWithIvRef` provides together with the key.
 //!
-//! The crate is `no_std` and contains no `unsafe` code. The default-off `alloc`
-//! feature adds the MACs that size their buffers from the cipher at run time,
-//! and `KeyOwned`; the `Fixed` forms keep theirs inline, with the block size as
-//! the const parameter `N`.
+//! The crate is `no_std` and contains no `unsafe` code. Only `alloc` reaches
+//! the heap; the `Fixed` forms keep their buffers inline, with the block size
+//! as the const parameter `N`.
 //!
 //! Every MAC documents its timing: each is constant time exactly when the
 //! cipher or digest it wraps is, and lengths are public. Every MAC wipes its
@@ -36,10 +41,12 @@
 //!
 //! # Example
 //!
-//! Generic code authenticates a message through the same calls whatever the
-//! MAC:
+//! With the `cmac` and `hmac` features, generic code authenticates a message
+//! through the same calls whatever the MAC:
 //!
 //! ```
+//! # #[cfg(all(feature = "cmac", feature = "hmac"))]
+//! # fn main() -> Result<(), Box<dyn core::error::Error>> {
 //! use tc_aes::AesEngine;
 //! use tc_macs::{FixedCmac, FixedHmac, KeyRef, Mac, MacInit};
 //! use tc_sha::Sha256Digest;
@@ -60,7 +67,10 @@
 //! let mut hmac = FixedHmac::new(Sha256Digest::new());
 //! hmac.init(&key)?;
 //! assert_eq!(tag(&mut hmac, b"attack at dawn")?.len(), 32);
-//! # Ok::<(), Box<dyn core::error::Error>>(())
+//! # Ok(())
+//! # }
+//! # #[cfg(not(all(feature = "cmac", feature = "hmac")))]
+//! # fn main() {}
 //! ```
 
 #![no_std]
@@ -70,33 +80,45 @@
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
+#[cfg(feature = "cbc-mac")]
 mod cbc;
+#[cfg(feature = "cfb-mac")]
 mod cfb;
+#[cfg(feature = "cmac")]
 mod cmac;
 mod errors;
+#[cfg(feature = "gmac")]
 mod gmac;
+#[cfg(feature = "hmac")]
 mod hmac;
 mod traits;
 
-#[cfg(feature = "alloc")]
+#[cfg(all(feature = "cbc-mac", feature = "alloc"))]
 pub use cbc::CbcMac;
+#[cfg(feature = "cbc-mac")]
 pub use cbc::FixedCbcMac;
+#[cfg(feature = "cbc-mac")]
 pub use cbc::FixedPaddedCbcMac;
-#[cfg(feature = "alloc")]
+#[cfg(all(feature = "cbc-mac", feature = "alloc"))]
 pub use cbc::PaddedCbcMac;
-#[cfg(feature = "alloc")]
+#[cfg(all(feature = "cfb-mac", feature = "alloc"))]
 pub use cfb::CfbMac;
+#[cfg(feature = "cfb-mac")]
 pub use cfb::FixedCfbMac;
+#[cfg(feature = "cfb-mac")]
 pub use cfb::FixedPaddedCfbMac;
-#[cfg(feature = "alloc")]
+#[cfg(all(feature = "cfb-mac", feature = "alloc"))]
 pub use cfb::PaddedCfbMac;
-#[cfg(feature = "alloc")]
+#[cfg(all(feature = "cmac", feature = "alloc"))]
 pub use cmac::Cmac;
+#[cfg(feature = "cmac")]
 pub use cmac::FixedCmac;
 pub use errors::{InitError, MacError};
+#[cfg(feature = "gmac")]
 pub use gmac::Gmac;
+#[cfg(feature = "hmac")]
 pub use hmac::FixedHmac;
-#[cfg(feature = "alloc")]
+#[cfg(all(feature = "hmac", feature = "alloc"))]
 pub use hmac::Hmac;
 #[cfg(feature = "alloc")]
 pub use tc_block_cipher::KeyOwned;

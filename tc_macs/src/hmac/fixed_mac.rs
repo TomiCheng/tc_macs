@@ -18,6 +18,8 @@ const MAXIMUM_DIGEST_SIZE: usize = 128;
 /// HMAC (RFC 2104) over the cloneable digest `D`, without an allocator;
 /// Bouncy Castle's `HMac`.
 ///
+/// Available with the `hmac` feature.
+///
 /// The tag is the digest's full output. `init` takes a key of any length
 /// through [`KeyParams`] and cannot fail; a key longer than the digest's block
 /// is hashed first. After `do_final` the MAC starts the next message under the

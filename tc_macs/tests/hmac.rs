@@ -1,5 +1,7 @@
 //! HMAC against the HMAC-SHA-256 and HMAC-SHA-512 vectors of RFC 4231.
 
+#![cfg(feature = "hmac")]
+
 use tc_macs::{FixedHmac, KeyRef, Mac, MacError, MacInit};
 use tc_sha::{Sha256Digest, Sha512Digest};
 

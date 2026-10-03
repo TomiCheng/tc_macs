@@ -1,6 +1,8 @@
 //! GMAC against the vectors of Bouncy Castle C#'s `GMacTest.cs`, which are
 //! NIST GCM test vectors with associated data alone.
 
+#![cfg(feature = "gmac")]
+
 use tc_aes::AesEngine;
 use tc_block_modes::KeyWithIvRef;
 use tc_des::DesEngine;

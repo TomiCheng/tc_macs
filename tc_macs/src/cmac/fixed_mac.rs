@@ -11,6 +11,8 @@ use crate::{InitError, Mac, MacError, MacInit};
 /// cipher `C` with blocks of `N` bytes, keeping its buffers inline for builds
 /// without an allocator; Bouncy Castle's `CMac`.
 ///
+/// Available with the `cmac` feature.
+///
 /// CMAC supports 64- and 128-bit block ciphers, so `N` is 8 or 16. The tag is
 /// the first [`mac_size`](Mac::mac_size) bytes of the full CMAC, a whole block
 /// unless sized otherwise. Unlike CBC-MAC, CMAC is secure for messages of any

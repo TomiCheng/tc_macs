@@ -13,8 +13,9 @@ const OPAD: u8 = 0x5c;
 const MINIMUM_BLOCK_LENGTH: usize = 16;
 
 /// HMAC (RFC 2104) over the digest `D`, with its pads sized from the digest's
-/// block length at run time; Bouncy Castle's `HMac`. Requires the `alloc`
-/// feature.
+/// block length at run time; Bouncy Castle's `HMac`.
+///
+/// Available with the `hmac` and `alloc` features.
 ///
 /// It computes the same tags as [`FixedHmac`](crate::FixedHmac) but does not
 /// require `D: Clone`, and it has no limit on the digest size. It keeps the

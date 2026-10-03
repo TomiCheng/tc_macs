@@ -10,8 +10,9 @@ use super::shared::CmacCore;
 use crate::{InitError, Mac, MacError, MacInit};
 
 /// CMAC (NIST SP 800-38B, RFC 4493) over the block cipher `C`, with buffers
-/// sized from its block size at run time; Bouncy Castle's `CMac`. Requires the
-/// `alloc` feature.
+/// sized from its block size at run time; Bouncy Castle's `CMac`.
+///
+/// Available with the `cmac` and `alloc` features.
 ///
 /// It computes the same tags as [`FixedCmac`](crate::FixedCmac) and, like it,
 /// supports 64- and 128-bit block ciphers only.

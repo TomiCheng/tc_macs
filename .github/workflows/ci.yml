@@ -83,8 +83,8 @@ jobs:
         env:
           RUSTUP_TOOLCHAIN: 1.85.0
       # Every dependency and dev-dependency is a tc_* crate that requires 1.85
-      # as well, so Rust 1.85 covers every build, tests included, with and
-      # without alloc.
+      # as well, so Rust 1.85 covers every build, tests included, whatever the
+      # features.
       - run: cargo +1.85.0 test --locked
       - run: cargo +1.85.0 test --locked --all-features
 
@@ -106,6 +106,14 @@ jobs:
       - run: cargo clippy --locked --all-targets --all-features -- -D warnings
       - run: cargo doc --locked --no-deps
       - run: cargo doc --locked --no-deps --all-features
+      # Each MAC alone, with and without its allocating form, so that none
+      # silently relies on another's items or doc links.
+      - name: Clippy and rustdoc on each tc_macs feature alone
+        run: |
+          for features in alloc cbc-mac cfb-mac cmac gmac hmac cbc-mac,alloc cfb-mac,alloc cmac,alloc hmac,alloc; do
+            cargo clippy --locked -p tc_macs --all-targets --features "$features" -- -D warnings
+            cargo doc --locked --no-deps -p tc_macs --features "$features"
+          done
       # Packaged together so tc_poly1305 is verified against this tc_macs, not
       # the release on crates.io.
       - run: cargo package --locked -p tc_macs -p tc_poly1305
@@ -138,11 +146,19 @@ jobs:
               exit 1
             fi
           }
-          macs='tc_aead_cipher tc_block_cipher tc_block_modes tc_block_padding tc_constant_time tc_digest tc_macs tc_zeroize'
-          # No dependency is platform-specific, so every target shares one set,
-          # and alloc enables features of existing dependencies only.
+          # The default build carries only the contracts; each MAC feature adds
+          # its own dependencies, and alloc enables features of existing ones.
+          base='tc_block_cipher tc_macs tc_zeroize'
+          modes='tc_block_modes tc_block_padding'
+          # No dependency is platform-specific, so every target shares one set.
           for target in aarch64-unknown-none wasm32-unknown-unknown x86_64-unknown-linux-gnu i686-unknown-linux-gnu; do
-            check "$macs" -p tc_macs --target "$target"
-            check "$macs" -p tc_macs --target "$target" --features alloc
-            check "$macs tc_poly1305" -p tc_poly1305 --target "$target"
+            check "$base" -p tc_macs --target "$target"
+            check "$base" -p tc_macs --target "$target" --features alloc
+            check "$base $modes" -p tc_macs --target "$target" --features cbc-mac
+            check "$base $modes" -p tc_macs --target "$target" --features cfb-mac
+            check "$base" -p tc_macs --target "$target" --features cmac
+            check "$base tc_aead_cipher tc_block_modes tc_constant_time" -p tc_macs --target "$target" --features gmac
+            check "$base tc_digest" -p tc_macs --target "$target" --features hmac
+            check "$base $modes tc_aead_cipher tc_constant_time tc_digest" -p tc_macs --target "$target" --all-features
+            check "$base tc_poly1305" -p tc_poly1305 --target "$target"
           done
