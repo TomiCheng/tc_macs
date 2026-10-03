@@ -2,7 +2,7 @@
 
 All notable changes to `tc_poly1305` are documented in this file.
 
-## 0.1.0 - Unreleased
+## 0.1.0 - 2026-10-03
 
 Initial release.
 
