@@ -20,8 +20,8 @@ use crate::{InitError, Mac, MacError, MacInit};
 /// [`mac_size`](Mac::mac_size) bytes of the encryption of the final shift
 /// register, half a block unless sized otherwise. A partial final segment is
 /// filled with zeros. `init` takes a key and an IV of one block through
-/// `tc_block_modes::IvParams`. After `do_final` the MAC starts the next message
-/// under the same key and IV.
+/// [`IvParams`](crate::IvParams), such as [`KeyWithIvRef`](crate::KeyWithIvRef).
+/// After `do_final` the MAC starts the next message under the same key and IV.
 ///
 /// Like CBC-MAC, CFB-MAC is secure only for messages of one fixed length. Use
 /// `FixedCmac` where lengths vary.
@@ -35,8 +35,7 @@ use crate::{InitError, Mac, MacError, MacInit};
 ///
 /// ```
 /// use tc_aes::AesEngine;
-/// use tc_block_modes::KeyWithIvRef;
-/// use tc_macs::{FixedCfbMac, Mac, MacInit};
+/// use tc_macs::{FixedCfbMac, KeyWithIvRef, Mac, MacInit};
 ///
 /// let mut mac = FixedCfbMac::<_, 16>::new(AesEngine::new());
 /// mac.init(&KeyWithIvRef::new(&[0x42; 16], &[0x24; 16]))?;
@@ -154,9 +153,8 @@ where
 ///
 /// ```
 /// use tc_aes::AesEngine;
-/// use tc_block_modes::KeyWithIvRef;
 /// use tc_block_padding::Pkcs7Padding;
-/// use tc_macs::{FixedPaddedCfbMac, Mac, MacInit};
+/// use tc_macs::{FixedPaddedCfbMac, KeyWithIvRef, Mac, MacInit};
 ///
 /// let mut mac = FixedPaddedCfbMac::<_, 16, _>::with_sizes(AesEngine::new(), 16, 16, Pkcs7Padding);
 /// mac.init(&KeyWithIvRef::new(&[0x42; 16], &[0x24; 16]))?;

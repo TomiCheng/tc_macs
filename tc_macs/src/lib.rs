@@ -27,8 +27,10 @@
 //!
 //! Every MAC takes its key through [`KeyParams`]; [`KeyRef`], [`KeyFixed`] and
 //! `KeyOwned` (`alloc`) are re-exported from `tc_block_cipher`. CBC-MAC,
-//! CFB-MAC and GMAC also take an IV through `tc_block_modes::IvParams`, which
-//! `tc_block_modes::KeyWithIvRef` provides together with the key.
+//! CFB-MAC and GMAC also take an IV through `IvParams`, which `KeyWithIvRef`,
+//! `KeyWithIvFixed` and `KeyWithIvOwned` (`alloc`) provide together with the
+//! key; with any of those three features, these are re-exported from
+//! `tc_block_modes`.
 //!
 //! The crate is `no_std` and contains no `unsafe` code. Only `alloc` reaches
 //! the heap; the `Fixed` forms keep their buffers inline, with the block size
@@ -123,4 +125,11 @@ pub use hmac::Hmac;
 #[cfg(feature = "alloc")]
 pub use tc_block_cipher::KeyOwned;
 pub use tc_block_cipher::{KeyFixed, KeyParams, KeyRef};
+#[cfg(all(
+    any(feature = "cbc-mac", feature = "cfb-mac", feature = "gmac"),
+    feature = "alloc"
+))]
+pub use tc_block_modes::KeyWithIvOwned;
+#[cfg(any(feature = "cbc-mac", feature = "cfb-mac", feature = "gmac"))]
+pub use tc_block_modes::{IvParams, KeyWithIvFixed, KeyWithIvRef};
 pub use traits::{Mac, MacInit};

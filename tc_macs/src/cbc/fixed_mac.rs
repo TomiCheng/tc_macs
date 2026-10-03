@@ -18,8 +18,9 @@ use crate::{InitError, Mac, MacError, MacInit};
 /// The tag is the first [`mac_size`](Mac::mac_size) bytes of the last block of
 /// the CBC encryption of the message, half a block unless sized otherwise. A
 /// partial final block is filled with zeros, and a full one is left as it is.
-/// `init` takes a key and an IV through `tc_block_modes::IvParams`; an all-zero
-/// IV gives the classic CBC-MAC and matches Bouncy Castle keyed without one.
+/// `init` takes a key and an IV through [`IvParams`](crate::IvParams), such as
+/// [`KeyWithIvRef`](crate::KeyWithIvRef); an all-zero IV gives the classic
+/// CBC-MAC and matches Bouncy Castle keyed without one.
 /// After `do_final` the MAC starts the next message under the same key and IV.
 ///
 /// CBC-MAC is secure only for messages of one fixed length: from tags of
@@ -36,8 +37,7 @@ use crate::{InitError, Mac, MacError, MacInit};
 ///
 /// ```
 /// use tc_aes::AesEngine;
-/// use tc_block_modes::KeyWithIvRef;
-/// use tc_macs::{FixedCbcMac, Mac, MacInit};
+/// use tc_macs::{FixedCbcMac, KeyWithIvRef, Mac, MacInit};
 ///
 /// let mut mac = FixedCbcMac::<_, 16>::with_mac_size(AesEngine::new(), 16);
 /// mac.init(&KeyWithIvRef::new(&[0x42; 16], &[0; 16]))?;
@@ -147,9 +147,8 @@ where
 ///
 /// ```
 /// use tc_aes::AesEngine;
-/// use tc_block_modes::KeyWithIvRef;
 /// use tc_block_padding::Pkcs7Padding;
-/// use tc_macs::{FixedPaddedCbcMac, Mac, MacInit};
+/// use tc_macs::{FixedPaddedCbcMac, KeyWithIvRef, Mac, MacInit};
 ///
 /// let mut mac = FixedPaddedCbcMac::<_, 16, _>::new(AesEngine::new(), Pkcs7Padding);
 /// mac.init(&KeyWithIvRef::new(&[0x42; 16], &[0; 16]))?;

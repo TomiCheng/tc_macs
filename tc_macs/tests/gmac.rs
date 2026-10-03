@@ -4,9 +4,8 @@
 #![cfg(feature = "gmac")]
 
 use tc_aes::AesEngine;
-use tc_block_modes::KeyWithIvRef;
 use tc_des::DesEngine;
-use tc_macs::{Gmac, InitError, Mac, MacError, MacInit};
+use tc_macs::{Gmac, InitError, KeyWithIvRef, Mac, MacError, MacInit};
 
 fn hex(text: &str) -> Vec<u8> {
     (0..text.len())

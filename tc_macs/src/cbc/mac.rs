@@ -29,8 +29,7 @@ use crate::{InitError, Mac, MacError, MacInit};
 ///
 /// ```
 /// use tc_aes::AesEngine;
-/// use tc_block_modes::KeyWithIvRef;
-/// use tc_macs::{CbcMac, Mac, MacInit};
+/// use tc_macs::{CbcMac, KeyWithIvRef, Mac, MacInit};
 ///
 /// let mut mac = CbcMac::with_mac_size(AesEngine::new(), 16);
 /// mac.init(&KeyWithIvRef::new(&[0x42; 16], &[0; 16]))?;
@@ -147,9 +146,8 @@ where
 ///
 /// ```
 /// use tc_aes::AesEngine;
-/// use tc_block_modes::KeyWithIvRef;
 /// use tc_block_padding::Pkcs7Padding;
-/// use tc_macs::{Mac, MacInit, PaddedCbcMac};
+/// use tc_macs::{KeyWithIvRef, Mac, MacInit, PaddedCbcMac};
 ///
 /// let mut mac = PaddedCbcMac::new(AesEngine::new(), Pkcs7Padding);
 /// mac.init(&KeyWithIvRef::new(&[0x42; 16], &[0; 16]))?;

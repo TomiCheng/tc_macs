@@ -39,6 +39,10 @@ Initial release.
   a `tc_digest::Digest`, keyed with a key of any length.
 - `KeyRef`, `KeyFixed`, `KeyParams` and, with `alloc`, `KeyOwned`, re-exported
   from `tc_block_cipher`.
+- With `cbc-mac`, `cfb-mac` or `gmac`, `IvParams`, `KeyWithIvRef`,
+  `KeyWithIvFixed` and, with `alloc` too, `KeyWithIvOwned`, re-exported from
+  `tc_block_modes`, so that callers of the MACs that take an IV need not
+  depend on it.
 - A failed `init` leaves every MAC uninitialized. `update` and `do_final` fail
   before `init`, and a short output buffer is refused without losing the
   message.

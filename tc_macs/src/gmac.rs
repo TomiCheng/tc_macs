@@ -20,8 +20,9 @@ const MAX_MAC_SIZE: usize = 16;
 /// Available with the `gmac` feature.
 ///
 /// The tag is 4 to 16 bytes, 16 unless sized otherwise. `init` takes a key and
-/// an IV through [`KeyParams`] and `tc_block_modes::IvParams`; the IV is GCM's
-/// nonce, of any length but zero, and 12 bytes is the length NIST recommends.
+/// an IV through [`KeyParams`] and [`IvParams`](crate::IvParams), such as
+/// [`KeyWithIvRef`](crate::KeyWithIvRef); the IV is GCM's nonce, of any length
+/// but zero, and 12 bytes is the length NIST recommends.
 ///
 /// The nonce must never repeat under one key: two tags under the same key and
 /// nonce let an attacker forge others. The GCM it wraps refuses at `init` the
@@ -38,8 +39,7 @@ const MAX_MAC_SIZE: usize = 16;
 ///
 /// ```
 /// use tc_aes::AesEngine;
-/// use tc_block_modes::KeyWithIvRef;
-/// use tc_macs::{Gmac, Mac, MacInit};
+/// use tc_macs::{Gmac, KeyWithIvRef, Mac, MacInit};
 ///
 /// let mut mac = Gmac::new(AesEngine::new());
 /// mac.init(&KeyWithIvRef::new(&[0x42; 16], &[0x24; 12]))?;

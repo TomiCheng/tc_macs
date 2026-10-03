@@ -4,10 +4,9 @@
 
 use core::convert::Infallible;
 
-use tc_block_modes::KeyWithIvRef;
 use tc_block_padding::{BlockCipherPadding, PaddingError, Pkcs7Padding};
 use tc_des::DesEngine;
-use tc_macs::{FixedCbcMac, FixedPaddedCbcMac, InitError, Mac, MacError, MacInit};
+use tc_macs::{FixedCbcMac, FixedPaddedCbcMac, InitError, KeyWithIvRef, Mac, MacError, MacInit};
 
 const KEY: [u8; 8] = [0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef];
 const IV: [u8; 8] = [0x12, 0x34, 0x56, 0x78, 0x90, 0xab, 0xcd, 0xef];

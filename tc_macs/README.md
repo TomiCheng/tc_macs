@@ -33,6 +33,8 @@ behind its own feature.
   primitive's.
 - `KeyRef`, `KeyFixed`, `KeyOwned` (`alloc`) — key containers re-exported from
   `tc_block_cipher`.
+- `KeyWithIvRef`, `KeyWithIvFixed`, `KeyWithIvOwned` (`alloc`) — a key and an
+  IV, re-exported from `tc_block_modes` with `cbc-mac`, `cfb-mac` or `gmac`.
 
 The `Fixed` forms keep their buffers inline, with the block size as a const
 parameter; the others also need `alloc` and size them from the cipher or
@@ -45,6 +47,8 @@ digest at run time.
 - `MacInit` — keys a MAC from parameters of type `P`.
 - `KeyParams` — the key a parameter type provides; re-exported from
   `tc_block_cipher`.
+- `IvParams` — the IV a parameter type provides; re-exported from
+  `tc_block_modes` with `cbc-mac`, `cfb-mac` or `gmac`.
 
 ## Features
 

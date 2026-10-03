@@ -40,9 +40,14 @@ adds nothing, `gmac` adds `tc_aead_cipher`, whose GCM carries GMAC, and
 adds `KeyOwned` and, for each MAC enabled, the form that sizes its buffers at
 run time (`CbcMac`, `PaddedCbcMac`, `CfbMac`, `PaddedCfbMac`, `Cmac` and
 `Hmac`), gated on both features; the `Fixed` forms keep their buffers inline.
-`alloc` enables features of existing dependencies and adds none. `tc_poly1305`
-has no feature, never allocates, and depends on the default build of `tc_macs`
-and on `tc_zeroize`. CI enforces each of these dependency sets with
+`alloc` enables features of existing dependencies and adds none. With
+`cbc-mac`, `cfb-mac` or `gmac`, `tc_macs` also re-exports the IV parameter
+types of `tc_block_modes` (`IvParams`, `KeyWithIvRef`, `KeyWithIvFixed`, and
+`KeyWithIvOwned` with `alloc`), as it re-exports the key containers of
+`tc_block_cipher`; the MACs already name `IvParams` in their public bounds, so
+the re-exports add no coupling. `tc_poly1305` has no feature, never
+allocates, and depends on the default build of `tc_macs` and on `tc_zeroize`.
+CI enforces each of these dependency sets with
 `cargo tree` on the `wasm32-unknown-unknown`, `aarch64-unknown-none` and x86
 targets, and runs Clippy and rustdoc on each `tc_macs` feature alone, with and
 without `alloc`, so that no MAC silently relies on another's items. A new MAC in
