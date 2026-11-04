@@ -113,6 +113,8 @@ fn every_public_api_and_implemented_trait_method_has_an_unambiguous_timing_doc()
             include_str!("../src/hmac/fixed_mac.rs"),
         ),
         ("hmac/mac.rs", include_str!("../src/hmac/mac.rs")),
+        ("siphash.rs", include_str!("../src/siphash.rs")),
+        ("vmpc.rs", include_str!("../src/vmpc.rs")),
     ] {
         let (checked, missing) = missing_timing_docs(source);
         if checked == 0 {

@@ -2,6 +2,35 @@
 
 All notable changes to `tc_macs` are documented in this file.
 
+## 0.1.1 - 2026-11-04
+
+### Added
+
+- `SipHash` behind the default-off `siphash` feature: SipHash-c-d with a 16-byte
+  key and an 8-byte tag, SipHash-2-4 from `new` and other round counts from
+  `with_rounds`, with `SipHash::KEY_BYTES` and `SipHash::TAG_BYTES`. `Display`
+  writes `"SipHash-2-4"`, as Bouncy Castle does.
+- `VmpcMac` behind the default-off `vmpc-mac` feature: VMPC-MAC with a key and an
+  IV of 16 to 64 bytes each, both required, and a 20-byte tag, with
+  `VmpcMac::TAG_BYTES`. `Display` writes `"VMPC-MAC"`, as Bouncy Castle does.
+- With `vmpc-mac`, the IV parameter types of `tc_block_modes` are re-exported as
+  they are with `cbc-mac`, `cfb-mac` and `gmac`.
+- Tests against the 64 SipHash-2-4 vectors of the reference implementation, the
+  one at length 15 being that of Bouncy Castle's `SipHashTest`, and the vector of
+  Bouncy Castle's `VMPCMacTest`, at every split of the input; tests of the error
+  paths; and doctests for both MACs.
+
+### Compatibility
+
+- Purely additive: every item of 0.1.0 is unchanged, and the default build keeps
+  its dependencies.
+- Requires Rust 1.85 or later. `siphash` adds no dependency, and `vmpc-mac` adds
+  `tc_block_modes` 0.1.
+- `SipHash` is constant time. `VmpcMac` is variable time: every step indexes its
+  permutation with bytes derived from the key and the message.
+- Both wipe their key and state on drop. Wiping does not reach the caller's
+  buffers or copies left in registers and on the stack.
+
 ## 0.1.0 - 2026-10-03
 
 Initial release.
