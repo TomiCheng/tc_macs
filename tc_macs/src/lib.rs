@@ -15,6 +15,8 @@
 //! - `gmac` — `Gmac`, GMAC (NIST SP 800-38D) over a 128-bit block cipher; adds
 //!   `tc_aead_cipher` and `tc_block_modes`.
 //! - `hmac` — `FixedHmac`, HMAC (RFC 2104) over a digest; adds `tc_digest`.
+//! - `siphash` — `SipHash`, SipHash-c-d; adds no dependency.
+//! - `vmpc-mac` — `VmpcMac`, VMPC-MAC; adds `tc_block_modes`.
 //! - `alloc` — `KeyOwned`, and for each MAC enabled the form that sizes its
 //!   buffers from the cipher or digest at run time: `CbcMac`, `PaddedCbcMac`,
 //!   `CfbMac`, `PaddedCfbMac`, `Cmac` and `Hmac`.
@@ -27,17 +29,18 @@
 //!
 //! Every MAC takes its key through [`KeyParams`]; [`KeyRef`], [`KeyFixed`] and
 //! `KeyOwned` (`alloc`) are re-exported from `tc_block_cipher`. CBC-MAC,
-//! CFB-MAC and GMAC also take an IV through `IvParams`, which `KeyWithIvRef`,
-//! `KeyWithIvFixed` and `KeyWithIvOwned` (`alloc`) provide together with the
-//! key; with any of those three features, these are re-exported from
-//! `tc_block_modes`.
+//! CFB-MAC, GMAC and VMPC-MAC also take an IV through `IvParams`, which
+//! `KeyWithIvRef`, `KeyWithIvFixed` and `KeyWithIvOwned` (`alloc`) provide
+//! together with the key; with any of those four features, these are
+//! re-exported from `tc_block_modes`.
 //!
 //! The crate is `no_std` and contains no `unsafe` code. Only `alloc` reaches
 //! the heap; the `Fixed` forms keep their buffers inline, with the block size
 //! as the const parameter `N`.
 //!
-//! Every MAC documents its timing: each is constant time exactly when the
-//! cipher or digest it wraps is, and lengths are public. Every MAC wipes its
+//! Every MAC documents its timing: each that wraps a cipher or digest is
+//! constant time exactly when that primitive is, `SipHash` is constant time and
+//! `VmpcMac` is variable time; lengths are public. Every MAC wipes its
 //! buffers on drop, and the cipher or digest it wraps wipes its own state when
 //! that type does, as the engines of `tc_aes`, `tc_des` and `tc_sha` do.
 //!
@@ -93,7 +96,11 @@ mod errors;
 mod gmac;
 #[cfg(feature = "hmac")]
 mod hmac;
+#[cfg(feature = "siphash")]
+mod siphash;
 mod traits;
+#[cfg(feature = "vmpc-mac")]
+mod vmpc;
 
 #[cfg(all(feature = "cbc-mac", feature = "alloc"))]
 pub use cbc::CbcMac;
@@ -122,14 +129,28 @@ pub use gmac::Gmac;
 pub use hmac::FixedHmac;
 #[cfg(all(feature = "hmac", feature = "alloc"))]
 pub use hmac::Hmac;
+#[cfg(feature = "siphash")]
+pub use siphash::SipHash;
 #[cfg(feature = "alloc")]
 pub use tc_block_cipher::KeyOwned;
 pub use tc_block_cipher::{KeyFixed, KeyParams, KeyRef};
 #[cfg(all(
-    any(feature = "cbc-mac", feature = "cfb-mac", feature = "gmac"),
+    any(
+        feature = "cbc-mac",
+        feature = "cfb-mac",
+        feature = "gmac",
+        feature = "vmpc-mac"
+    ),
     feature = "alloc"
 ))]
 pub use tc_block_modes::KeyWithIvOwned;
-#[cfg(any(feature = "cbc-mac", feature = "cfb-mac", feature = "gmac"))]
+#[cfg(any(
+    feature = "cbc-mac",
+    feature = "cfb-mac",
+    feature = "gmac",
+    feature = "vmpc-mac"
+))]
 pub use tc_block_modes::{IvParams, KeyWithIvFixed, KeyWithIvRef};
 pub use traits::{Mac, MacInit};
+#[cfg(feature = "vmpc-mac")]
+pub use vmpc::VmpcMac;

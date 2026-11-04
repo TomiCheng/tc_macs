@@ -110,7 +110,7 @@ jobs:
       # silently relies on another's items or doc links.
       - name: Clippy and rustdoc on each tc_macs feature alone
         run: |
-          for features in alloc cbc-mac cfb-mac cmac gmac hmac cbc-mac,alloc cfb-mac,alloc cmac,alloc gmac,alloc hmac,alloc; do
+          for features in alloc cbc-mac cfb-mac cmac gmac hmac siphash vmpc-mac cbc-mac,alloc cfb-mac,alloc cmac,alloc gmac,alloc hmac,alloc siphash,alloc vmpc-mac,alloc; do
             cargo clippy --locked -p tc_macs --all-targets --features "$features" -- -D warnings
             cargo doc --locked --no-deps -p tc_macs --features "$features"
           done
@@ -159,6 +159,8 @@ jobs:
             check "$base" -p tc_macs --target "$target" --features cmac
             check "$base tc_aead_cipher tc_block_modes tc_constant_time" -p tc_macs --target "$target" --features gmac
             check "$base tc_digest" -p tc_macs --target "$target" --features hmac
+            check "$base" -p tc_macs --target "$target" --features siphash
+            check "$base tc_block_modes" -p tc_macs --target "$target" --features vmpc-mac
             check "$base $modes tc_aead_cipher tc_constant_time tc_digest" -p tc_macs --target "$target" --all-features
             check "$base tc_poly1305" -p tc_poly1305 --target "$target"
           done
