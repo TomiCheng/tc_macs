@@ -6,9 +6,9 @@
 [![license](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](#license)
 ![rustc](https://img.shields.io/badge/rustc-1.85+-blue.svg)
 
-Message authentication codes over block ciphers and digests: CBC-MAC,
-CFB-MAC, CMAC, GMAC and HMAC, and the `Mac` and `MacInit` contracts they share
-with MAC crates such as [`tc_poly1305`](https://crates.io/crates/tc_poly1305).
+Message authentication codes over block ciphers and digests, CBC-MAC,
+CFB-MAC, CMAC, GMAC and HMAC, and on their own, SipHash and VMPC-MAC, and the
+`Mac` and `MacInit` contracts they share with MAC crates such as [`tc_poly1305`](https://crates.io/crates/tc_poly1305).
 Ported from Bouncy Castle C#. `no_std`, no `unsafe`, Rust 1.85 or later.
 
 The default build carries only the contracts, their errors and the key
@@ -29,12 +29,16 @@ behind its own feature.
   or 128-bit block cipher.
 - `Gmac` (`gmac`) — GMAC (NIST SP 800-38D) over a 128-bit block cipher.
 - `FixedHmac`, `Hmac` (`hmac`) — HMAC (RFC 2104) over a `tc_digest` digest.
+- `SipHash` (`siphash`) — SipHash-c-d, with a 16-byte key and an 8-byte tag.
+- `VmpcMac` (`vmpc-mac`) — VMPC-MAC, with a key and IV of 16 to 64 bytes and a
+  20-byte tag.
 - `InitError`, `MacError` — initialization and processing errors that wrap the
   primitive's.
 - `KeyRef`, `KeyFixed`, `KeyOwned` (`alloc`) — key containers re-exported from
   `tc_block_cipher`.
 - `KeyWithIvRef`, `KeyWithIvFixed`, `KeyWithIvOwned` (`alloc`) — a key and an
-  IV, re-exported from `tc_block_modes` with `cbc-mac`, `cfb-mac` or `gmac`.
+  IV, re-exported from `tc_block_modes` with `cbc-mac`, `cfb-mac`, `gmac` or
+  `vmpc-mac`.
 
 The `Fixed` forms keep their buffers inline, with the block size as a const
 parameter; the others also need `alloc` and size them from the cipher or
@@ -48,7 +52,7 @@ digest at run time.
 - `KeyParams` — the key a parameter type provides; re-exported from
   `tc_block_cipher`.
 - `IvParams` — the IV a parameter type provides; re-exported from
-  `tc_block_modes` with `cbc-mac`, `cfb-mac` or `gmac`.
+  `tc_block_modes` with `cbc-mac`, `cfb-mac`, `gmac` or `vmpc-mac`.
 
 ## Features
 
@@ -59,6 +63,8 @@ digest at run time.
 - `cmac` (off by default) — CMAC; adds no dependency.
 - `gmac` (off by default) — GMAC; adds `tc_aead_cipher` and `tc_block_modes`.
 - `hmac` (off by default) — HMAC; adds `tc_digest`.
+- `siphash` (off by default, since 0.1.1) — SipHash; adds no dependency.
+- `vmpc-mac` (off by default, since 0.1.1) — VMPC-MAC; adds `tc_block_modes`.
 - `alloc` (off by default) — the MACs sized at run time, and `KeyOwned`; does
   not require the standard library.
 
@@ -88,6 +94,8 @@ CMAC, GMAC or HMAC where lengths vary. A GMAC nonce must never repeat under one
 key. Compare a received tag in constant time. Each MAC is constant time
 exactly when the cipher or digest it wraps is: `tc_aes::AesEngine` is constant
 time unless it falls back to its table engine, and the engines of `tc_des` are
+variable time. `SipHash` is constant time, and its 8-byte tag suits hash tables
+and other short-lived authenticators rather than general use. `VmpcMac` is
 variable time. Every MAC wipes its buffers on drop.
 
 ## License

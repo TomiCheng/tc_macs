@@ -36,12 +36,13 @@ on nothing more; it depends on `tc_block_cipher` and `tc_zeroize`. Each MAC is
 behind its own default-off feature, which adds only what that MAC needs:
 `cbc-mac` and `cfb-mac` add `tc_block_modes` and `tc_block_padding`, `cmac`
 adds nothing, `gmac` adds `tc_aead_cipher`, whose GCM carries GMAC, and
-`tc_block_modes`, and `hmac` adds `tc_digest`. The default-off `alloc` feature
+`tc_block_modes`, `hmac` adds `tc_digest`, `siphash` adds nothing and `vmpc-mac`
+adds `tc_block_modes`. The default-off `alloc` feature
 adds `KeyOwned` and, for each MAC enabled, the form that sizes its buffers at
 run time (`CbcMac`, `PaddedCbcMac`, `CfbMac`, `PaddedCfbMac`, `Cmac` and
 `Hmac`), gated on both features; the `Fixed` forms keep their buffers inline.
 `alloc` enables features of existing dependencies and adds none. With
-`cbc-mac`, `cfb-mac` or `gmac`, `tc_macs` also re-exports the IV parameter
+`cbc-mac`, `cfb-mac`, `gmac` or `vmpc-mac`, `tc_macs` also re-exports the IV parameter
 types of `tc_block_modes` (`IvParams`, `KeyWithIvRef`, `KeyWithIvFixed`, and
 `KeyWithIvOwned` with `alloc`), as it re-exports the key containers of
 `tc_block_cipher`; the MACs already name `IvParams` in their public bounds, so
@@ -69,8 +70,9 @@ Every `do_final` checks the output length before touching any state, so a
 short buffer leaves the message in place; keep that order. A failed `init`
 leaves the MAC uninitialized, so it never goes on under the previous key.
 
-Every MAC in `tc_macs` is constant time exactly when the cipher or digest it
-wraps is, and `Poly1305` is constant time; lengths are public.
+Every MAC in `tc_macs` that wraps a cipher or digest is constant time exactly
+when that primitive is; `SipHash` and `Poly1305` are constant time, and
+`VmpcMac` is variable time; lengths are public.
 `tests/documentation.rs` in each crate requires every public type and method,
 and every trait method a MAC implements, to say which, and matches the phrase
 within one line, so never wrap a line between "constant" or "variable" and
@@ -78,8 +80,8 @@ within one line, so never wrap a line between "constant" or "variable" and
 contract of each item stated in its doc comment.
 
 Every MAC wipes its key material and message-derived state on drop: the
-`tc_macs` cores hold their buffers in `Zeroizing`, and `Poly1305` wipes its
-fields in `Drop`. A new field that holds either must be wiped too. The wrapped
+`tc_macs` cores hold their buffers in `Zeroizing`, and `SipHash`, `VmpcMac` and
+`Poly1305` wipe their fields in `Drop`. A new field that holds either must be wiped too. The wrapped
 cipher, mode or digest wipes its own state when its type does, which the
 documentation states rather than promises; copies on the stack, in registers or
 left behind by moves are a documented limitation, not wiped per block.
