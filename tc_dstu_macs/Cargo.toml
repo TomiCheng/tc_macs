@@ -1,0 +1,21 @@
+[package]
+name = "tc_dstu_macs"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "The DSTU 7564 (Kupyna) and DSTU 7624 (Kalyna) message authentication codes, no_std and free of unsafe code"
+readme = "README.md"
+documentation = "https://docs.rs/tc_dstu_macs"
+keywords = ["dstu", "kupyna", "kalyna", "mac", "cryptography"]
+categories = ["cryptography", "no-std"]
+include = ["src/**", "tests/**", "README.md", "CHANGELOG.md", "LICENSE-MIT", "LICENSE-APACHE"]
+
+[dependencies]
+tc_block_cipher = "0.1.0"
+tc_digest = "0.1.0"
+tc_dstu7564 = "0.1.0"
+tc_dstu7624 = "0.1.0"
+tc_macs = { version = "0.1.0", path = "../tc_macs" }
+tc_zeroize = { version = "0.1.0", features = ["alloc"] }

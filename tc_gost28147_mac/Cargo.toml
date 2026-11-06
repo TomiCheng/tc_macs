@@ -1,0 +1,26 @@
+[package]
+name = "tc_gost28147_mac"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "The GOST 28147-89 message authentication code, no_std and free of unsafe code"
+readme = "README.md"
+documentation = "https://docs.rs/tc_gost28147_mac"
+keywords = ["gost", "gost28147", "mac", "cryptography"]
+categories = ["cryptography", "no-std"]
+include = ["src/**", "tests/**", "README.md", "CHANGELOG.md", "LICENSE-MIT", "LICENSE-APACHE"]
+
+[package.metadata.docs.rs]
+all-features = true
+
+[features]
+alloc = ["tc_zeroize/alloc"]
+
+[dependencies]
+tc_block_cipher = "0.1.0"
+tc_block_modes = "0.1.0"
+tc_gost28147 = "0.1.0"
+tc_macs = { version = "0.1.0", path = "../tc_macs" }
+tc_zeroize = "0.1.0"
