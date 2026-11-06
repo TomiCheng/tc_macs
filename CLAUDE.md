@@ -48,6 +48,12 @@ types of `tc_block_modes` (`IvParams`, `KeyWithIvRef`, `KeyWithIvFixed`, and
 `tc_block_cipher`; the MACs already name `IvParams` in their public bounds, so
 the re-exports add no coupling. `tc_poly1305` has no feature, never
 allocates, and depends on the default build of `tc_macs` and on `tc_zeroize`.
+`tc_dstu_macs` and `tc_gost28147_mac` depend on the default build of `tc_macs`,
+on `tc_block_cipher` and on `tc_zeroize`. `tc_dstu_macs` has no feature, adds
+`tc_digest`, `tc_dstu7564` and `tc_dstu7624`, and needs an allocator.
+`tc_gost28147_mac` adds `tc_block_modes` and `tc_gost28147`; its default-off
+`alloc` feature adds `Gost28147MacParamsOwned` and no dependency, and the MAC
+itself never allocates.
 CI enforces each of these dependency sets with
 `cargo tree` on the `wasm32-unknown-unknown`, `aarch64-unknown-none` and x86
 targets, and runs Clippy and rustdoc on each `tc_macs` feature alone, with and
@@ -58,21 +64,26 @@ entry in the README's "Features" list, and the CI loops and dependency checks.
 
 `tc_macs` owns the `Mac` and `MacInit` contracts, the Rust form of Bouncy
 Castle's `IMac`; MAC crates such as `tc_poly1305` implement them rather than
-defining their own, and report `InitError` and `MacError`. Those errors wrap
+defining their own, and report `InitError` and `MacError`, except that
+`Dstu7624Mac` reports its own `Dstu7624MacError`, which carries the unaligned
+message the shared error has no case for. Those errors wrap
 the primitive's error, and their `Display` describes only their own layer,
 leaving the primitive's error to `source`. MACs name themselves through
 `Display`, as Bouncy Castle's `AlgorithmName` does, except that CMAC writes
 `<cipher>/CMAC`, since Bouncy Castle's name is that of its inner CBC mode and
 collides with CBC-MAC's. Each MAC follows its Bouncy Castle class, default tag
-sizes included, with two deliberate exceptions: CBC-MAC and CFB-MAC require an
-IV of exactly one block, and `Poly1305::do_final` consumes the one-time key.
+sizes included, with three deliberate exceptions: CBC-MAC, CFB-MAC and
+`Gost28147Mac` require an IV of exactly one block, `Poly1305::do_final` consumes
+the one-time key, and `Dstu7564Mac` accepts the keys of a whole number of digest
+blocks, on which Bouncy Castle's padding throws.
 Every `do_final` checks the output length before touching any state, so a
 short buffer leaves the message in place; keep that order. A failed `init`
 leaves the MAC uninitialized, so it never goes on under the previous key.
 
 Every MAC in `tc_macs` that wraps a cipher or digest is constant time exactly
 when that primitive is; `SipHash` and `Poly1305` are constant time, and
-`VmpcMac` is variable time; lengths are public.
+`VmpcMac`, `Dstu7564Mac`, `Dstu7624Mac` and `Gost28147Mac` are variable time;
+lengths are public.
 `tests/documentation.rs` in each crate requires every public type and method,
 and every trait method a MAC implements, to say which, and matches the phrase
 within one line, so never wrap a line between "constant" or "variable" and

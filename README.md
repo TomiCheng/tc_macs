@@ -5,7 +5,9 @@ shared `Mac` and `MacInit` contracts together with CBC-MAC, CFB-MAC, CMAC,
 GMAC and HMAC over any engine that implements the
 [`tc_block_cipher`](https://crates.io/crates/tc_block_cipher) traits or any
 digest that implements [`tc_digest`](https://crates.io/crates/tc_digest),
-SipHash and VMPC-MAC, and the MACs built on those contracts: `tc_poly1305`, the Poly1305 one-time MAC.
+SipHash and VMPC-MAC, and the MACs built on those contracts: `tc_poly1305`, the
+Poly1305 one-time MAC, `tc_dstu_macs`, the DSTU 7564 and DSTU 7624 MACs, and
+`tc_gost28147_mac`, the GOST 28147-89 MAC.
 Each crate is published separately and keeps its own README and changelog.
 
 [![CI](https://github.com/TomiCheng/tc_macs/actions/workflows/ci.yml/badge.svg)](https://github.com/TomiCheng/tc_macs/actions/workflows/ci.yml)
@@ -18,6 +20,8 @@ Each crate is published separately and keeps its own README and changelog.
 | --- | --- | --- |
 | [`tc_macs`](tc_macs) | [![crates.io](https://img.shields.io/crates/v/tc_macs.svg)](https://crates.io/crates/tc_macs) [![docs.rs](https://docs.rs/tc_macs/badge.svg)](https://docs.rs/tc_macs) | CBC-MAC, CFB-MAC, CMAC, GMAC and HMAC over `tc_block_cipher` engines and `tc_digest` digests, SipHash and VMPC-MAC, and the `Mac` and `MacInit` contracts that MAC crates implement. Each MAC over a cipher or digest is constant time exactly when that primitive is, SipHash is constant time and VMPC-MAC is variable time; each wipes its buffers on drop. `no_std`, no `unsafe`; the default build carries only the contracts and depends on `tc_block_cipher` and `tc_zeroize`. Default-off `cbc-mac`, `cfb-mac`, `cmac`, `gmac`, `hmac`, `siphash` and `vmpc-mac` features add the MACs, and a default-off `alloc` feature adds the forms sized at run time. |
 | [`tc_poly1305`](tc_poly1305) | [![crates.io](https://img.shields.io/crates/v/tc_poly1305.svg)](https://crates.io/crates/tc_poly1305) [![docs.rs](https://docs.rs/tc_poly1305/badge.svg)](https://docs.rs/tc_poly1305) | Raw Poly1305 (RFC 8439) with a 32-byte one-time key, which `do_final` consumes. Constant time; wipes its key and state on drop. `no_std`, no allocator, no `unsafe`, no features; depends on `tc_macs` and `tc_zeroize`. |
+| [`tc_dstu_macs`](tc_dstu_macs) | [![crates.io](https://img.shields.io/crates/v/tc_dstu_macs.svg)](https://crates.io/crates/tc_dstu_macs) [![docs.rs](https://docs.rs/tc_dstu_macs/badge.svg)](https://docs.rs/tc_dstu_macs) | The DSTU 7564 (Kupyna) and DSTU 7624 (Kalyna) MACs. Variable time; wipes its key and state on drop. `no_std` with an allocator, no `unsafe`, no features; depends on `tc_macs`, `tc_block_cipher`, `tc_digest`, `tc_dstu7564`, `tc_dstu7624` and `tc_zeroize`. |
+| [`tc_gost28147_mac`](tc_gost28147_mac) | [![crates.io](https://img.shields.io/crates/v/tc_gost28147_mac.svg)](https://crates.io/crates/tc_gost28147_mac) [![docs.rs](https://docs.rs/tc_gost28147_mac/badge.svg)](https://docs.rs/tc_gost28147_mac) | The GOST 28147-89 MAC with a 4-byte tag. Variable time; wipes its key and state on drop. `no_std`, no `unsafe`; a default-off `alloc` feature adds owned parameters; depends on `tc_macs`, `tc_block_cipher`, `tc_block_modes`, `tc_gost28147` and `tc_zeroize`. |
 
 `tc_macs` defines the contracts that every MAC crate in the workspace
 implements; each MAC documents its own tag sizes, key and IV requirements and
@@ -26,8 +30,9 @@ timing guarantees.
 ## Requirements
 
 Rust 1.85 or later, edition 2024. Every crate builds without `std`.
-`tc_macs` reaches the heap only through its default-off `alloc` feature, and
-`tc_poly1305` never does.
+`tc_macs` and `tc_gost28147_mac` reach the heap only through their default-off
+`alloc` features, `tc_poly1305` never does, and `tc_dstu_macs` needs an allocator
+for the key of its `Dstu7564Mac`.
 
 Rust 1.85 is the earliest compiler for edition 2024, and it is guaranteed for
 every build in this workspace, tests included: every dependency and
@@ -62,8 +67,8 @@ cargo publish -p <crate> --dry-run --locked
 
 The archive must include both license texts, the crate README, the changelog,
 the source and the integration tests, and no `target/` or other build
-artifacts. `tc_poly1305` requires the `tc_macs` release, so `tc_macs`
-publishes first.
+artifacts. `tc_poly1305`, `tc_dstu_macs` and `tc_gost28147_mac` require the
+`tc_macs` release, so `tc_macs` publishes first.
 
 ## License
 

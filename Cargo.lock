@@ -72,6 +72,59 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1c37ed9f10c96ccd2c46a9a2b872070772c6385621665f4ba076b6d779e6be6f"
 
 [[package]]
+name = "tc_dstu7564"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "be12c1faf1286d2ec5eb954faadab86c2bd92d10d1717046f4b209e79074655f"
+dependencies = [
+ "tc_digest",
+ "tc_zeroize",
+]
+
+[[package]]
+name = "tc_dstu7624"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c26e5319b34a61d3cef6d5d4d0e93fdbff40f69b5b2d967c51d5f6ac1576b366"
+dependencies = [
+ "tc_block_cipher",
+ "tc_zeroize",
+]
+
+[[package]]
+name = "tc_dstu_macs"
+version = "0.1.0"
+dependencies = [
+ "tc_block_cipher",
+ "tc_digest",
+ "tc_dstu7564",
+ "tc_dstu7624",
+ "tc_macs",
+ "tc_zeroize",
+]
+
+[[package]]
+name = "tc_gost28147"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b54d4f875d196c123ca065208bbceeb75812e5ad27fbd52b7f6012a48d061fb2"
+dependencies = [
+ "tc_block_cipher",
+ "tc_zeroize",
+]
+
+[[package]]
+name = "tc_gost28147_mac"
+version = "0.1.0"
+dependencies = [
+ "tc_block_cipher",
+ "tc_block_modes",
+ "tc_gost28147",
+ "tc_macs",
+ "tc_zeroize",
+]
+
+[[package]]
 name = "tc_macs"
 version = "0.1.1"
 dependencies = [
