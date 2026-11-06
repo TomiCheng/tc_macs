@@ -2,7 +2,7 @@
 
 All notable changes to `tc_dstu_macs` are documented in this file.
 
-## 0.1.0 - Unreleased
+## 0.1.0 - 2026-11-06
 
 Initial release.
 
