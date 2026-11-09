@@ -1,6 +1,14 @@
 [workspace]
 resolver = "3"
-members = ["tc_macs", "tc_poly1305", "tc_dstu_macs", "tc_gost28147_mac"]
+members = [
+    "tc_macs",
+    "tc_poly1305",
+    "tc_dstu_macs",
+    "tc_gost28147_mac",
+    "tc_iso9797_mac",
+    "tc_kmac",
+    "tc_skein_mac",
+]
 
 [workspace.package]
 edition = "2024"
