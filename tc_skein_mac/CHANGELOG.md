@@ -2,7 +2,7 @@
 
 All notable changes to `tc_skein_mac` are documented in this file.
 
-## 0.1.0 - Unreleased
+## 0.1.0 - 2026-11-09
 
 Initial release.
 
