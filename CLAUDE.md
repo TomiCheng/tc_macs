@@ -54,6 +54,13 @@ on `tc_block_cipher` and on `tc_zeroize`. `tc_dstu_macs` has no feature, adds
 `tc_gost28147_mac` adds `tc_block_modes` and `tc_gost28147`; its default-off
 `alloc` feature adds `Gost28147MacParamsOwned` and no dependency, and the MAC
 itself never allocates.
+`tc_iso9797_mac` depends on the default build of `tc_macs`, on
+`tc_block_cipher`, `tc_block_modes`, `tc_block_padding`, `tc_des` and
+`tc_zeroize`, has no feature and never allocates. `tc_kmac` depends on the
+default build of `tc_macs`, on `tc_digest`, `tc_keccak` and `tc_zeroize`, has no
+feature and needs an allocator for its key. `tc_skein_mac` depends on the
+default build of `tc_macs` and on `tc_skein`; its default-off `alloc` feature
+re-exports `SkeinParamsOwned` and adds no dependency.
 CI enforces each of these dependency sets with
 `cargo tree` on the `wasm32-unknown-unknown`, `aarch64-unknown-none` and x86
 targets, and runs Clippy and rustdoc on each `tc_macs` feature alone, with and
@@ -72,8 +79,8 @@ leaving the primitive's error to `source`. MACs name themselves through
 `Display`, as Bouncy Castle's `AlgorithmName` does, except that CMAC writes
 `<cipher>/CMAC`, since Bouncy Castle's name is that of its inner CBC mode and
 collides with CBC-MAC's. Each MAC follows its Bouncy Castle class, default tag
-sizes included, with three deliberate exceptions: CBC-MAC, CFB-MAC and
-`Gost28147Mac` require an IV of exactly one block, `Poly1305::do_final` consumes
+sizes included, with three deliberate exceptions: CBC-MAC, CFB-MAC,
+`Gost28147Mac` and `Iso9797Alg3Mac` require an IV of exactly one block, `Poly1305::do_final` consumes
 the one-time key, and `Dstu7564Mac` accepts the keys of a whole number of digest
 blocks, on which Bouncy Castle's padding throws.
 Every `do_final` checks the output length before touching any state, so a
@@ -81,8 +88,9 @@ short buffer leaves the message in place; keep that order. A failed `init`
 leaves the MAC uninitialized, so it never goes on under the previous key.
 
 Every MAC in `tc_macs` that wraps a cipher or digest is constant time exactly
-when that primitive is; `SipHash` and `Poly1305` are constant time, and
-`VmpcMac`, `Dstu7564Mac`, `Dstu7624Mac` and `Gost28147Mac` are variable time;
+when that primitive is; `SipHash`, `Poly1305`, `KMac` and `SkeinMac` are
+constant time, and `VmpcMac`, `Dstu7564Mac`, `Dstu7624Mac`, `Gost28147Mac` and
+`Iso9797Alg3Mac` are variable time;
 lengths are public.
 `tests/documentation.rs` in each crate requires every public type and method,
 and every trait method a MAC implements, to say which, and matches the phrase
