@@ -1,0 +1,21 @@
+[package]
+name = "tc_iso9797_mac"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "The ISO/IEC 9797-1 MAC algorithm 3 (ANSI X9.19 retail MAC) over DES, no_std and free of unsafe code"
+readme = "README.md"
+documentation = "https://docs.rs/tc_iso9797_mac"
+keywords = ["iso9797", "retail-mac", "x9-19", "mac", "cryptography"]
+categories = ["cryptography", "no-std"]
+include = ["src/**", "tests/**", "README.md", "CHANGELOG.md", "LICENSE-MIT", "LICENSE-APACHE"]
+
+[dependencies]
+tc_block_cipher = "0.1.0"
+tc_block_modes = "0.1.0"
+tc_block_padding = "0.1.0"
+tc_des = "0.1.0"
+tc_macs = { version = "0.1.0", path = "../tc_macs" }
+tc_zeroize = "0.1.0"

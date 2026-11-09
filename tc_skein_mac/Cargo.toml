@@ -1,0 +1,25 @@
+[package]
+name = "tc_skein_mac"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Skein-MAC with a 256-, 512- or 1024-bit state, no_std and free of unsafe code"
+readme = "README.md"
+documentation = "https://docs.rs/tc_skein_mac"
+keywords = ["skein", "threefish", "mac", "cryptography"]
+categories = ["cryptography", "no-std"]
+include = ["src/**", "tests/**", "README.md", "CHANGELOG.md", "LICENSE-MIT", "LICENSE-APACHE"]
+
+
+[package.metadata.docs.rs]
+all-features = true
+
+[features]
+default = []
+alloc = ["tc_skein/alloc"]
+
+[dependencies]
+tc_macs = { version = "0.1.0", path = "../tc_macs" }
+tc_skein = "0.1.0"

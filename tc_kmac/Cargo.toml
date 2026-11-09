@@ -1,0 +1,19 @@
+[package]
+name = "tc_kmac"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "KMAC128 and KMAC256 (NIST SP 800-185), as fixed-length MACs and as KMACXOF, no_std and free of unsafe code"
+readme = "README.md"
+documentation = "https://docs.rs/tc_kmac"
+keywords = ["kmac", "sha3", "keccak", "mac", "cryptography"]
+categories = ["cryptography", "no-std"]
+include = ["src/**", "tests/**", "README.md", "CHANGELOG.md", "LICENSE-MIT", "LICENSE-APACHE"]
+
+[dependencies]
+tc_digest = "0.1.0"
+tc_keccak = "0.1.0"
+tc_macs = { version = "0.1.0", path = "../tc_macs" }
+tc_zeroize = { version = "0.1.0", features = ["alloc"] }
